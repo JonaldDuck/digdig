@@ -30,12 +30,11 @@ require("common");
 
 local chocoBuffId = 252;
 
-local countersFileName = "digCounter.txt"
+local countersFileName = "digCounter.txt";
 
 local path = ('%s\\config\\addons\\%s'):fmt(AshitaCore:GetInstallPath(), 'digdig');
 
-zoneMap = { [120] = "Sauromogue Champaign", [124] = "Yhoator Jungle", [125] = "Western Altepa Desert", [114] = "Eastern Altepa Desert" };
-zoneCounters = {};
+digCounter = 0;
 
 
 
@@ -55,19 +54,13 @@ ashita.events.register('text_in', 'text_in_cb', function (e)
 end);
 
 function trackDig()
-    local currentZone = AshitaCore:GetMemoryManager():GetParty():GetMemberZone(0);
-    if zoneCounters[currentZone] == nil then
-        zoneCounters[currentZone] = 1
-    else
-        zoneCounters[currentZone] = zoneCounters[currentZone] + 1
-    end
     saveDigData();
-    return  " Items dug up in " .. getZoneName() .. " so far: " .. zoneCounters[currentZone];
+    return  " Items dug up so far: " .. digCounter;
 end
 
 function isOnChocobo()
     local player = AshitaCore:GetMemoryManager():GetPlayer();
-    local buffs = player:GetBuffs()
+    local buffs = player:GetBuffs();
     for i=1, 32 do
         if buffs[i] == chocoBuffId then
             return true;
@@ -76,36 +69,23 @@ function isOnChocobo()
     return false;
 end
 
-function getZoneName()
-    local zoneId = AshitaCore:GetMemoryManager():GetParty():GetMemberZone(0)
-    if zoneMap[zoneId] ~= nil then
-        return zoneMap[zoneId];
-    end
-    return zoneId;
-end
-
 function saveDigData()
     if not ashita.fs.exists(path) then
-        ashita.fs.create_directory(path)
+        ashita.fs.create_directory(path);
     end
-    local file, errorString = io.open( path .. "\\" .. countersFileName, "w+" )
-    for key, value in pairs(zoneCounters) do
-        file:write(key .. ":" .. value .. "\n")
-    end
+    local file, errorString = io.open( path .. "\\" .. countersFileName, "w+" );
+    file:write(digCounter);
     
-    io.close(file)
+    io.close(file);
 end
 
 function loadDigData()
     if ashita.fs.exists(path) then
-        local file, errorString = io.open(path .. "\\" .. countersFileName, "r")
-        for line in file:lines() do
-            for key, value in string.gmatch(line, "(%w+):(%w+)") do
-                zoneCounters[tonumber(key)] = value
-            end
-        end
+        local file, errorString = io.open(path .. "\\" .. countersFileName, "r");
+        digCounter = file.read();
         io.close(file);
     end
+    print("Current chocobo dig count: " .. digCounter)
 end
 
 loadDigData()
