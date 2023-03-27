@@ -82,10 +82,30 @@ end
 function loadDigData()
     if ashita.fs.exists(path) then
         local file, errorString = io.open(path .. "\\" .. countersFileName, "r");
-        digCounter = file.read();
+        digCounter = file:read();
+        if digCounter == nil then
+            digCounter = 0;
+        end
         io.close(file);
     end
     print("Current chocobo dig count: " .. digCounter)
 end
 
 loadDigData()
+
+ashita.events.register("command", "command_callback1", function (e)
+    local args = e.command:args();
+    if (#args == 0 or args[1] ~= "/digdig") then
+        return;
+    else
+        e.blocked = true;
+        if (args[2] == "reset") then
+            digCounter = 0;
+            saveDigData();
+            print ("digdig counter reset!")
+        else
+            print("digdig -- you can reset your dig counter with /digdig reset");
+        end
+
+    end
+end);
