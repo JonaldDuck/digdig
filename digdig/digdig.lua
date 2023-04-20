@@ -54,6 +54,7 @@ ashita.events.register('text_in', 'text_in_cb', function (e)
 end);
 
 function trackDig()
+    digCounter = digCounter + 1;
     saveDigData();
     return  " Items dug up so far: " .. digCounter;
 end
